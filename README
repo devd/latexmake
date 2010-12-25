@@ -1,0 +1,2 @@
+Ugly hack that aims to take care of compiling tex files to pdf.
+Can use latex/pdflatex, supports bibtex. NOT TESTED
