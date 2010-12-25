@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use List::Util qw{max};
 use Getopt::Long;
+use IPC::Run3;
 
 my $basefile='paper';
 my $bibtex_db_check=1;
@@ -56,7 +57,7 @@ if($log_file =~ qr{^! LaTeX Error:(.*$)}m){
 
 if($log_file =~ qr{^LaTeX Warning: Citation.*undefined on input line \d*\.$}m){
   print "Found some citations undefined, running bibtex...\n";
-  system("bibtex $basefile > /dev/null 2>/dev/null");
+  run3 ["bibtex",$basefile],\undef,\undef,\undef;
   my $biblog=readLog('blg');
   if($biblog =~ m/\(There were \d* error messages\)\Z/){
     my $errormsg = '';
@@ -90,8 +91,8 @@ if($log_file =~ m/Warning/){
 
 unless($use_pdflatex){
   print "Converting ps to pdf...\n";
-  system("dvips $basefile.dvi > /dev/null 2>/dev/null");
-  system("ps2pdf $basefile.ps > /dev/null 2>/dev/null");
+  run3 ["dvips","$basefile.dvi"], \undef,\undef,\undef;
+  run3 ["ps2pdf","$basefile.ps"], \undef,\undef,\undef;
   unlink("$basefile.dvi","$basefile.ps");
 }
 
@@ -115,6 +116,6 @@ sub cleanup{
 
 sub run{
   print $_[0], " running $progname...\n";
-  system("$progname -interaction=batchmode $input > /dev/null 2>/dev/null");
+  run3 [$progname,'-interaction=batchmode',$input],\undef,\undef,\undef;
   return $? == -1 ? 0 : $?>>8;
 }
